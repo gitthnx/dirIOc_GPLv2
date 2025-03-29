@@ -1,0 +1,39 @@
+name: test dirIO /dev/shm
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Run-dirIO-on-Ubuntu:
+    name: run dirIO on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+#      - uses: actions/setup-node@v4
+#        with:
+#          node-version: '14'
+#      - run: |
+#          sudo apt-get update
+#      - run:
+#          sudo apt-get install htop
+      - run:
+          ls -al /home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp
+      - run:
+      #   whereis bash
+          whereis chmod      
+      
+      #- run:
+      #    shell: /usr/bin/bash -ieo pipefail {0}
+      #    shell:
+      #        sudo bash --noprofile --norc -eo pipefail {0}
+      #        sudo bash --noprofile --norc -eo pipefail ${{ github.event_name == 'workflow_dispatch' }}
+      #- shell:
+      #    sudo bash --noprofile --norc -eo pipefail ${{ github.event_name == 'workflow_dispatch' }}
+      
+      - run:
+          chmod +x /home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp/dirIO_graphical_0.1.5.sh
+      #- run:
+      #    sudo /usr/bin/bash -c "/home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp/dirIO_graphical_0.1.5.sh /dev/shm"
+      
