@@ -14,7 +14,15 @@ OBJ2 = $(SRC2:.c=.o)
 
 # Default target
 all: $(TARGET)
+	@echo
+	@echo "build targets: all, 0.1.5.1 (29032025) " 
+	@echo "options: clean, install, uninstall"
+	@echo 
+
 0.1.5.1: $(TARGET2)  # 'make -j12 0.1.5.1'
+	@echo
+	@echo "options: clean, install, uninstall"
+	@echo
 
 
 # Build target executable
