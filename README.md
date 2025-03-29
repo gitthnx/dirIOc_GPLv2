@@ -11,7 +11,20 @@
 ### syntax and keys 
 
     ./dirIOc 
-<br> 
+<br>  
+
+       keys: search tree level == 'n'
+             output mode       == 'm'
+             pause             == 'p'
+             resume            == ' ' or 'r'
+             clear screen      == 'c' or 'C'
+             help              == 'h' or 'H' or '?'
+             quit              == 'q' or 'Q'
+
+       version 0.1.5.1 (C implementation)
+       March 2025
+
+
        Usage: ./dirIOc  /directory/to/monitor            
 <br>
 
