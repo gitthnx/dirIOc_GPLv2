@@ -1,0 +1,159 @@
+name: build dirIO, C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+#          platform: [linux/amd64, linux/arm64, linux/arm]
+          platform: [linux/amd64]
+# comments
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/setup-qemu-action@v3
+#        with:
+#          image: tonistiigi/binfmt:latest
+#          platforms: arm,arm64
+#      - run: >
+#          docker build .
+#          --tag my-builder
+#          --platform ${{ matrix.platform }}
+#      - run: >
+#          docker create
+#          --name node-bcryptjs-builder
+#          --platform ${{ matrix.platform }}
+#          my-builder
+#      - run: docker cp "my-builder:/usr/local/opt/myproject/*.tar.gz .
+
+#    - name: configure
+#      run: ./configure
+    - name: Output Run ID
+      run: echo ${{ github.run_id }}
+    - name: Output Run Number
+      run: echo ${{ github.run_number }}
+    - name: Output Run Attempt
+      run: echo ${{ github.run_attempt }}
+    - name: ls to directory tmp_C
+      run: ls -al /home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp_C
+    - name: cd into tmp_C
+      #run: cd /home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp_C
+      run: cd tmp_C
+    - name: ls all content from within tmp_C
+      run: ls -al ./*
+    - name: df to system
+      run: df -h
+    - name: lsblk to system
+      run: lsblk
+    - name: uname to system
+      run: uname -a
+    #- name: du to system
+    #  run: time du /
+    - name: lscpu to system
+      run: lscpu
+    - name: dmesg to system
+      run: sudo dmesg -T
+    - name: get os info
+      run: lsb_release -a
+   # - name: apt update
+   #   run: sudo apt-get update
+   # - name: apt upgrade
+   #   run: sudo apt-get upgrade
+   # - name: apt install
+   #   run: sudo apt install -y inxi
+   # - name: inxi to system
+   #   run: inxi -a -F -m
+      
+    - name: makefile on repository folder tmp_C
+      run: make -j12 all
+#      run: make -C tmp_C all
+#    - name: make check
+#      run: make check
+#    - name: make distcheck
+#      run: make distcheck
+    - name: cp tmp_C/dirIO_v0.1.5_deepSeek
+      run: cp tmp_C/dirIO_v0.1.5_deepSeek tmp_C/dirIO_workflowActionBuilt_v0.1.5_deepSeek_2025
+    - name: ls tmp_C
+      run: ls -al tmp_C/*
+    - name: ls tmp_C
+      run: ls -al /home/runner/work/dirIO_GPLv2/dirIO_GPLv2/tmp_C
+
+  upload:
+    strategy:
+      matrix:
+        runs-on: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: ls to tmp_C
+      run: ls -al tmp_C
+    - name: makefile on repository folder tmp_C
+      run: make -j12 all
+    - name: ls to system
+      run: ls -al ./*      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dirIO_v0.1.5_deepSeek
+        path: tmp_C/dirIO_v0.1.5_deepSeek
+        
+    - name: Create a File
+      run: echo "hello from ${{ matrix.runs-on }}" > file-${{ matrix.runs-on }}.txt
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact-${{ matrix.runs-on }}
+       # name: tmp_C/dirIO_v0.1.5_deepSeek
+       # path: file-${{ matrix.runs-on }}.txt
+        path: file-${{ matrix.runs-on }}.txt
+
+  deploy:
+    name: Deploy
+    needs: build
+    #runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    steps:
+     # - uses: actions/checkout@master
+      - uses: actions/checkout@v4
+      - name: ls to tmp_C
+        run: ls -al tmp_C
+      - name: makefile on repository folder tmp_C
+        run: make -j12 all
+      - name: ls to system
+        run: ls -al ./* 
+      - name: mkdir artifacts
+        run: mkdir artifacts 
+      - name: touch file "test" within artifacts folder
+        run: touch artifacts/test
+      - name: ls to system
+        run: ls -al ./* 
+    
+      - name: Download Artifact
+        uses: actions/download-artifact@master
+        with:
+         # name: build
+         name: dirIO_v0.1.5_deepSeek
+         # path: build
+         path: artifacts/dirIO_v0.1.5_deepSeek
+      - name: ls to system
+        run: ls -al ./* 
+         
+      - name: Deploy to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp \
+          --recursive \
+          --acl public-read \
+          --region ap-southeast-2 \
+          ./tmp_C s3://example
+
+      - name: ls to system
+        run: ls -al ./* 
